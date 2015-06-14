@@ -44,7 +44,6 @@ def autocorrentropy2(X, sigma=1):
                 V[i, j, :] = (X[i, :(t-j), :] * X[i, j:, :]).sum(axis=0) / (t-j)
             else:
                 V[i, j, :] = np.exp((-(X[i, :(t-j), :]-X[i, j:, :])**2) / dem).sum(axis=0) / (t-j)
-
     return V
 
 
@@ -125,7 +124,7 @@ def main(save_to, num_epochs):
                     DataStreamMonitoring(
                         [cost, error_rate],
                         validstream,
-                        prefix="valid"),
+                        prefix="test"),
                     DataStreamMonitoringAndSaving(
                     [cost, error_rate],
                     teststream,
