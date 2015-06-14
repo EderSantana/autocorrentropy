@@ -65,7 +65,7 @@ def _meanize(n_steps, flag=False):
             Rval[:, i, :] = allrotations(sample.reshape((28, 28)), n_steps)
             Rval[10:, i, :] = 0.
             num = np.random.randint(0, n_steps, size=1)
-            Rval[:, i, :] = np.roll(Rval, num, axis=0)
+            Rval[:, i, :] = np.roll(Rval[:, i, :], num, axis=0)
         # Rval = newfirst[np.newaxis].repeat(n_steps, axis=0)
         if flag:
             V = autocorrentropy2(Rval.transpose(1, 0, 2))
