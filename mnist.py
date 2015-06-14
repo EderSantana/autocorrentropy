@@ -34,7 +34,7 @@ data = mnist.get_data(handle, slice(0, 50000))[0]
 means = data.mean(axis=0)
 
 
-def autocorrentropy2(X, sigma=1):
+def autocorrentropy2(X, sigma=np.inf):
     b, t, d = X.shape
     V = np.zeros((b, t, d))
     dem = 2*sigma**2
