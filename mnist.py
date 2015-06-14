@@ -74,7 +74,7 @@ def _meanize(n_steps, flag=False):
     return func
 
 
-def main(save_to, num_epochs):
+def main(save_to, num_epochs, flag):
     batch_size = 128
     dim = 100
     n_steps = 20
@@ -103,15 +103,15 @@ def main(save_to, num_epochs):
     mnist_test = MNIST("test")
     trainstream = Mapping(Flatten(DataStream(mnist_train,
                           iteration_scheme=SequentialScheme(50000, batch_size))),
-                          _meanize(n_steps))
+                          _meanize(n_steps, flag))
     validstream = Mapping(Flatten(DataStream(mnist_valid,
                                              iteration_scheme=SequentialScheme(10000,
                                                                                batch_size))),
-                          _meanize(n_steps))
+                          _meanize(n_steps, flag))
     teststream = Mapping(Flatten(DataStream(mnist_test,
                                             iteration_scheme=SequentialScheme(10000,
                                                                               batch_size))),
-                         _meanize(n_steps))
+                         _meanize(n_steps, flag))
 
     algorithm = GradientDescent(
         cost=cost, params=cg.parameters,
@@ -157,5 +157,7 @@ if __name__ == "__main__":
     parser.add_argument("save_to", default="mnist.pkl", nargs="?",
                         help=("Destination to save the state of the training "
                               "process."))
+    parser.add_argument("--flag", type=bool, default=False,
+                        help="Number of training epochs to do.")
     args = parser.parse_args()
-    main(args.save_to, args.num_epochs)
+    main(args.save_to, args.num_epochs, args.flag)
