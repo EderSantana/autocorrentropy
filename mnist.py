@@ -91,7 +91,7 @@ def main(save_to, num_epochs):
 
     preproc = i2h1.apply(x)
     h1 = rec1.apply(preproc)
-    probs = h2o1.apply(h1[-1])
+    probs = tensor.flatten(h2o1.apply(h1[-1],), outdim=2)
     cost = CategoricalCrossEntropy().apply(y.flatten(), probs)
     error_rate = MisclassificationRate().apply(y.flatten(), probs)
     cost.name = 'final_cost'
