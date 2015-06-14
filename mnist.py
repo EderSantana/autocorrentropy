@@ -130,7 +130,7 @@ def main(save_to, num_epochs):
                     teststream,
                     [i2h1, h2o1, rec1],
                     'best_'+save_to+'.pkl',
-                    cost_name=cost.name,
+                    cost_name=error_rate.name,
                     after_epoch=True,
                     prefix='valid'
                     ),
