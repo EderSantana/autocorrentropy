@@ -57,7 +57,7 @@ def allrotations(image, N):
 
 def _meanize(n_steps, flag=False, ksize=np.inf):
     def func(data):
-        newfirst = data[0]  # - means[None, :]
+        newfirst = data[0] - means[None, :]
         Rval = np.zeros((n_steps, newfirst.shape[0], newfirst.shape[1]))
         for i, sample in enumerate(newfirst):
             Rval[:, i, :] = allrotations(sample.reshape((28, 28)), n_steps)
