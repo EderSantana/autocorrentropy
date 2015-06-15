@@ -31,7 +31,7 @@ floatX = theano.config.floatX
 mnist = MNIST('train', sources=['features'])
 handle = mnist.open()
 data = mnist.get_data(handle, slice(0, 50000))[0]
-means = data.mean(axis=0)
+means = data.reshape((50000, 784)).mean(axis=0)
 
 
 def autocorrentropy2(X, ksize=np.inf):
