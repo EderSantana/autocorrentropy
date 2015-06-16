@@ -8,9 +8,8 @@ from argparse import ArgumentParser
 from theano import tensor
 from skimage.transform import rotate
 
-from blocks.bricks.cost import BinaryCrossEntropy
-from blocks.bricks import MLP, Identity, Tanh, Softmax, Rectifier
-from blocks.bricks.recurrent import SimpleRecurrent, LSTM
+from blocks.bricks import MLP, Identity, Tanh, Logistic, Rectifier
+from blocks.bricks.recurrent import SimpleRecurrent
 from blocks.algorithms import GradientDescent, Adam, CompositeRule, StepClipping
 from blocks.initialization import IsotropicGaussian, Orthogonal, Constant
 from fuel.streams import DataStream
@@ -34,6 +33,18 @@ data = mnist.get_data(handle, slice(0, 50000))[0]
 means = data.reshape((50000, 784)).mean(axis=0)
 
 
+def autocorrentropy2(X, ksize=np.inf):
+    b, t, d = X.shape
+    V = np.zeros((b, t, d))
+    for i in range(b):
+        for j in range(t):
+            if ksize in (np.inf, 0., np.nan):
+                V[i, j, :] = (X[i, :(t-j), :] * X[i, j:, :]).sum(axis=0) / (t-j)
+            else:
+                V[i, j, :] = np.exp((-ksize * (X[i, :(t-j), :]-X[i, j:, :])**2)).sum(axis=0) / (t-j)
+    return V
+
+
 def allrotations(image, N):
     angles = np.linspace(0, 350, N)
     R = np.zeros((N, 784))
@@ -45,7 +56,7 @@ def allrotations(image, N):
 
 def _meanize(n_steps):
     def func(data):
-        newfirst = data[0]  # - means[None, :]
+        newfirst = data[0] - means[None, :]
         Rval = np.zeros((n_steps, newfirst.shape[0], newfirst.shape[1]))
         for i, sample in enumerate(newfirst):
             Rval[:, i, :] = allrotations(sample.reshape((28, 28)), n_steps)
@@ -61,22 +72,22 @@ def main(save_to, num_epochs):
     batch_size = 128
     dim = 100
     n_steps = 20
-    i2h1 = MLP([Identity()], [784, 4*dim], biases_init=Constant(0.), weights_init=IsotropicGaussian(.001))
-    h2o1 = MLP([Rectifier(), Softmax()], [dim, dim, 10],
+    i2h1 = MLP([Identity()], [784, dim], biases_init=Constant(0.), weights_init=IsotropicGaussian(.001))
+    h2o1 = MLP([Rectifier(), Logistic()], [dim, dim, 10],
                biases_init=Constant(0.), weights_init=IsotropicGaussian(.001))
-    rec1 = LSTM(dim=dim, activation=Tanh(), biases_init=Constant(0), weights_init=IsotropicGaussian(.001))
+    rec1 = SimpleRecurrent(dim=dim, activation=Tanh(), weights_init=Orthogonal())
     i2h1.initialize()
     h2o1.initialize()
     rec1.initialize()
 
     x = tensor.tensor3('features')
-    y = tensor.tensor3('targets')
+    y = tensor.lmatrix('targets')
 
     preproc = i2h1.apply(x)
-    h1, _ = rec1.apply(preproc)
+    h1 = rec1.apply(preproc)
     x_hat = h2o1.apply(h1)
-
-    cost = BinaryCrossEntropy().apply(y, x_hat).mean()
+    cost = tensor.nnet.binary_crossentropy(x_hat, y).mean()
+    # cost = CategoricalCrossEntropy().apply(y.flatten(), probs)
     cost.name = 'final_cost'
 
     cg = ComputationGraph([cost, ])
@@ -140,5 +151,9 @@ if __name__ == "__main__":
     parser.add_argument("save_to", default="mnist.pkl", nargs="?",
                         help=("Destination to save the state of the training "
                               "process."))
+    parser.add_argument("--flag", type=bool, default=False,
+                        help="Use autocorrentropy or not?")
+    parser.add_argument("--ksize", type=float, default=np.inf,
+                        help="Kernel size of the autocorrentropy function.")
     args = parser.parse_args()
     main(args.save_to, args.num_epochs)
