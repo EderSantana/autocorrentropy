@@ -64,7 +64,7 @@ def main(save_to, num_epochs):
     i2h1 = MLP([Identity()], [784, 4*dim], biases_init=Constant(0.), weights_init=IsotropicGaussian(.001))
     h2o1 = MLP([Rectifier(), Softmax()], [dim, dim, 10],
                biases_init=Constant(0.), weights_init=IsotropicGaussian(.001))
-    rec1 = LSTM(dim=dim, activation=Tanh(), weights_init=Orthogonal())
+    rec1 = LSTM(dim=dim, activation=Tanh(), biases_init=Constant(0), weights_init=IsotropicGaussian(.001))
     i2h1.initialize()
     h2o1.initialize()
     rec1.initialize()
