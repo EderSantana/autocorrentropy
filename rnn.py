@@ -73,7 +73,7 @@ def main(save_to, num_epochs):
     dim = 100
     n_steps = 20
     i2h1 = MLP([Identity()], [784, dim], biases_init=Constant(0.), weights_init=IsotropicGaussian(.001))
-    h2o1 = MLP([Rectifier(), Logistic()], [dim, dim, 10],
+    h2o1 = MLP([Rectifier(), Logistic()], [dim, dim, 784],
                biases_init=Constant(0.), weights_init=IsotropicGaussian(.001))
     rec1 = SimpleRecurrent(dim=dim, activation=Tanh(), weights_init=Orthogonal())
     i2h1.initialize()
