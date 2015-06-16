@@ -116,19 +116,18 @@ def main(save_to, num_epochs):
         trainstream,
         extensions=[Timing(),
                     FinishAfter(after_n_epochs=num_epochs),
-                    DataStreamMonitoring(
-                        [cost, ],
-                        validstream,
-                        prefix="test"),
+                    # DataStreamMonitoring(
+                    #     [cost, ],
+                    #     teststream,
+                    #     prefix="test"),
                     DataStreamMonitoringAndSaving(
                     [cost, ],
-                    teststream,
+                    validstream,
                     [i2h1, h2o1, rec1],
                     'best_'+save_to+'.pkl',
                     cost_name=cost.name,
                     after_epoch=True,
-                    prefix='valid'
-                    ),
+                    prefix='valid'),
                     TrainingDataMonitoring(
                         [cost,
                          aggregation.mean(algorithm.total_gradient_norm)],
