@@ -43,7 +43,7 @@ def allrotations(image, N):
     return R
 
 
-def _meanize(n_steps, flag=False, ksize=np.inf):
+def _meanize(n_steps):
     def func(data):
         newfirst = data[0]  # - means[None, :]
         Rval = np.zeros((n_steps, newfirst.shape[0], newfirst.shape[1]))
@@ -87,15 +87,15 @@ def main(save_to, num_epochs):
     mnist_test = MNIST("test")
     trainstream = Mapping(Flatten(DataStream(mnist_train,
                           iteration_scheme=SequentialScheme(50000, batch_size))),
-                          _meanize(n_steps, flag, ksize))
+                          _meanize(n_steps))
     validstream = Mapping(Flatten(DataStream(mnist_valid,
                                              iteration_scheme=SequentialScheme(10000,
                                                                                batch_size))),
-                          _meanize(n_steps, flag, ksize))
+                          _meanize(n_steps))
     teststream = Mapping(Flatten(DataStream(mnist_test,
                                             iteration_scheme=SequentialScheme(10000,
                                                                               batch_size))),
-                         _meanize(n_steps, flag, ksize))
+                         _meanize(n_steps))
 
     algorithm = GradientDescent(
         cost=cost, params=cg.parameters,
