@@ -57,7 +57,7 @@ def _meanize(n_steps, flag=False, ksize=np.inf):
     return func
 
 
-def main(save_to, num_epochs, flag, ksize):
+def main(save_to, num_epochs):
     batch_size = 128
     dim = 100
     n_steps = 20
@@ -142,4 +142,4 @@ if __name__ == "__main__":
                         help=("Destination to save the state of the training "
                               "process."))
     args = parser.parse_args()
-    main(args.save_to, args.num_epochs, args.flag, args.ksize)
+    main(args.save_to, args.num_epochs)
