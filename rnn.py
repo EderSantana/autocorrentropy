@@ -64,7 +64,7 @@ def _meanize(n_steps):
             num = np.random.randint(0, n_steps, size=1)
             Rval[:, i, :] = np.roll(Rval[:, i, :], num, axis=0)
         Rval = Rval.astype(floatX)
-        return (Rval[1:], Rval[:-1])
+        return (Rval,)
     return func
 
 
@@ -81,19 +81,20 @@ def main(save_to, num_epochs):
     rec1.initialize()
 
     x = tensor.tensor3('features')
-    y = tensor.lmatrix('targets')
+    x1 = x[1:, :, :]
+    x2 = x[:-1, :, :]
 
-    preproc = i2h1.apply(x)
+    preproc = i2h1.apply(x1)
     h1 = rec1.apply(preproc)
     x_hat = h2o1.apply(h1)
-    cost = tensor.nnet.binary_crossentropy(x_hat, y).mean()
+    cost = tensor.nnet.binary_crossentropy(x_hat, x2).mean()
     # cost = CategoricalCrossEntropy().apply(y.flatten(), probs)
     cost.name = 'final_cost'
 
     cg = ComputationGraph([cost, ])
 
-    mnist_train = MNIST("train", subset=slice(0, 50000))
-    mnist_valid = MNIST("train", subset=slice(50000, 60000))
+    mnist_train = MNIST("train", subset=slice(0, 50000), sources=('features', ))
+    mnist_valid = MNIST("train", subset=slice(50000, 60000), sources=('features',))
     mnist_test = MNIST("test")
     trainstream = Mapping(Flatten(DataStream(mnist_train,
                           iteration_scheme=SequentialScheme(50000, batch_size))),
